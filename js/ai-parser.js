@@ -168,7 +168,7 @@ function extractPlateFromFileName(name) {
 }
 
 /**
- * Doğrulama Modalını Açar
+ * Doğrulama Modalını Açar (Manuel Ekle veya AI Ruhsat)
  */
 function openVerifyModal(data, fileName, isFallback = false) {
   const modal = document.getElementById('verifyModal');
@@ -180,8 +180,10 @@ function openVerifyModal(data, fileName, isFallback = false) {
   const hiddenType = document.getElementById('verifyAracCinsi');
   const markaInput = document.getElementById('verifyMarka');
   const modelInput = document.getElementById('verifyModel');
+  const notlarInput = document.getElementById('verifyNotlar');
   const previewBox = document.getElementById('verifyDocBadge');
   const aiBadge = document.getElementById('verifyAiBadge');
+  const modalTitle = document.getElementById('verifyModalTitle');
 
   if (plakaInput) plakaInput.value = data.plaka || '';
   if (saseInput) {
@@ -201,32 +203,33 @@ function openVerifyModal(data, fileName, isFallback = false) {
 
   if (markaInput) markaInput.value = data.marka || '';
   if (modelInput) modelInput.value = data.model || '';
+  if (notlarInput) notlarInput.value = data.notlar || '';
 
-  if (previewBox) {
-    previewBox.textContent = fileName || 'Taranan Ruhsat Belgesi';
-  }
-
-  if (aiBadge) {
-    if (isFallback) {
-      aiBadge.textContent = 'Manuel Düzenleme';
-      aiBadge.className = 'ai-status-badge fallback';
-    } else {
+  if (isFallback) {
+    if (modalTitle) modalTitle.textContent = 'Yeni Araç Ekle';
+    if (aiBadge) aiBadge.style.display = 'none';
+    if (previewBox) previewBox.style.display = 'none';
+  } else {
+    if (modalTitle) modalTitle.textContent = 'Ruhsat Bilgileri';
+    if (aiBadge) {
+      aiBadge.style.display = 'inline-block';
       aiBadge.textContent = 'AI Otomatik Okundu';
       aiBadge.className = 'ai-status-badge success';
+    }
+    if (previewBox) {
+      previewBox.style.display = 'inline-flex';
+      previewBox.textContent = fileName || 'Taranan Ruhsat Belgesi';
     }
   }
 
   modal.classList.add('active');
-  if (plakaInput && !plakaInput.value) {
-    plakaInput.focus();
-  } else if (saseInput) {
-    saseInput.focus();
-  }
+  document.body.style.overflow = 'hidden';
 }
 
 function closeVerifyModal() {
   const modal = document.getElementById('verifyModal');
   if (modal) modal.classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 /**

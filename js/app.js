@@ -156,6 +156,7 @@ function setupSegmentedTabs() {
 
   track.addEventListener('touchstart', (e) => {
     if (e.touches.length !== 1) return;
+    if (document.querySelector('.modal-overlay.active')) return;
     const t = e.touches[0];
     dragStartX = t.clientX;
     dragStartY = t.clientY;
@@ -551,11 +552,21 @@ function setupModals() {
       openVerifyModal({
         plaka: '',
         saseNo: '',
-        aracCinsi: 'Dorse',
+        aracCinsi: currentFilter === 'Dorse' ? 'Dorse' : 'Çekici',
         marka: '',
         model: ''
-      }, 'Manuel Araç Girişi', true);
+      }, 'Yeni Araç Ekle', true);
       hapticTap(15);
+    });
+  }
+
+  // Doğrulama Modalı dışına dokununca kapat
+  const verifyModal = document.getElementById('verifyModal');
+  if (verifyModal) {
+    verifyModal.addEventListener('click', (e) => {
+      if (e.target === verifyModal) {
+        closeVerifyModal();
+      }
     });
   }
 
@@ -586,6 +597,7 @@ function setupSettingsModal() {
     btnOpen.addEventListener('click', () => {
       if (apiKeyInput) apiKeyInput.value = getGeminiApiKey();
       modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
       hapticTap(10);
     });
   }
@@ -593,6 +605,16 @@ function setupSettingsModal() {
   if (btnClose && modal) {
     btnClose.addEventListener('click', () => {
       modal.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+  }
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
     });
   }
 
@@ -601,7 +623,10 @@ function setupSettingsModal() {
       setGeminiApiKey(apiKeyInput.value);
       showToast('API Anahtarı kaydedildi!', 'success');
       hapticTap(15);
-      if (modal) modal.classList.remove('active');
+      if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
     });
   }
 

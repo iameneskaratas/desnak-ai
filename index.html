@@ -25,14 +25,14 @@
     })();
   </script>
 
-  <!-- Stil Dosyası (v2.2.0 - iPhone Optimized) -->
-  <link rel="stylesheet" href="css/app.css?v=2.2.0">
+  <!-- Stil Dosyası (v2.3.0 - iPhone Native Perfect) -->
+  <link rel="stylesheet" href="css/app.css?v=2.3.0">
 </head>
 <body>
   <!-- Duvar Kağıdı Katmanı -->
   <div class="wallpaper-backdrop" aria-hidden="true"></div>
 
-  <!-- Üst Başlık (Sticky iOS Safe Area Header) -->
+  <!-- Üst Başlık (Desktop Clean Header & Mobile Passthrough) -->
   <header class="desnak-header">
     <div class="header-inner">
       <div class="brand-wrapper">
@@ -42,7 +42,7 @@
         </h1>
       </div>
 
-      <div class="header-actions">
+      <div class="header-actions" id="headerSystemBar">
         <!-- Bulut Senkronizasyon Rozeti -->
         <div class="sync-badge" title="Firebase Bulut Eşitleme Durumu">
           <span id="syncStatusDot" class="sync-dot"></span>
@@ -69,6 +69,18 @@
 
   <!-- Ana İçerik -->
   <main class="desnak-main">
+    <!-- Mobil Hero Marka (Logo & Başlık - Leb Tasarımı) -->
+    <section class="desnak-hero-brand" id="heroBrandSection">
+      <div class="hero-brand-inner">
+        <img src="icons/header-logo.svg" alt="Desnak AI Logo" class="hero-logo-img" width="38" height="38">
+        <div class="hero-text-wrap">
+          <h1 class="hero-title">
+            Desnak <span class="brand-ai-badge">AI</span>
+          </h1>
+        </div>
+      </div>
+    </section>
+
     <!-- Hızlı Arama Kutusu -->
     <div class="search-wrapper">
       <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -150,7 +162,6 @@
   <!-- AI Doğrulama & Manuel Ekleme Alt Çarşafı (Verification Modal) -->
   <div id="verifyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">
     <div class="modal-sheet">
-      <div class="sheet-handle"></div>
       <div class="sheet-header">
         <div>
           <h2 id="verifyModalTitle" class="sheet-title">Ruhsat Bilgileri</h2>
@@ -189,8 +200,8 @@
       <div class="form-group">
         <label class="form-label">Marka ve Model</label>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-          <input type="text" id="verifyMarka" class="form-input" placeholder="Marka (Tırsan, Krone, vs.)" autocapitalize="characters">
-          <input type="text" id="verifyModel" class="form-input" placeholder="Model / Yıl">
+          <input type="text" id="verifyMarka" class="form-input" placeholder="Marka (Tırsan, Krone vb.)" autocapitalize="characters">
+          <input type="text" id="verifyModel" class="form-input" placeholder="Model / Yıl (2022)">
         </div>
       </div>
 
@@ -220,7 +231,6 @@
   <!-- Ayarlar & API Anahtarı Modalı -->
   <div id="settingsModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
     <div class="modal-sheet">
-      <div class="sheet-handle"></div>
       <div class="sheet-header">
         <h2 id="settingsModalTitle" class="sheet-title">Uygulama Ayarları</h2>
         <button type="button" id="btnCloseSettings" class="header-btn" style="font-size: 1.3rem; padding: 4px;">✕</button>
@@ -252,9 +262,9 @@
     <span id="toastText">Kopyalandı</span>
   </div>
 
-  <!-- JS Modülleri (v2.2.0) -->
-  <script src="js/sync.js?v=2.2.0"></script>
-  <script src="js/ai-parser.js?v=2.2.0"></script>
-  <script src="js/app.js?v=2.2.0"></script>
+  <!-- JS Modülleri (v2.3.0) -->
+  <script src="js/sync.js?v=2.3.0"></script>
+  <script src="js/ai-parser.js?v=2.3.0"></script>
+  <script src="js/app.js?v=2.3.0"></script>
 </body>
 </html>
