@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="50%" stop-color="#6366F1" />
+      <stop offset="100%" stop-color="#A855F7" />
+    </linearGradient>
+    <linearGradient id="pillGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#2DD4BF" />
+    </linearGradient>
+  </defs>
+
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#bgGrad)" stroke="rgba(255,255,255,0.12)" stroke-width="3" />
+
+  <path d="M 120 256 H 200 L 230 200 H 300" stroke="rgba(56,189,248,0.25)" stroke-width="6" stroke-linecap="round" fill="none" />
+  <circle cx="300" cy="200" r="8" fill="#38BDF8" opacity="0.6" />
+
+  <path d="M 160 140 V 372" stroke="url(#glowGrad)" stroke-width="34" stroke-linecap="round" />
+  
+  <path d="M 160 140 H 260 C 330 140 376 186 376 256 C 376 326 330 372 260 372 H 160" 
+        stroke="url(#glowGrad)" stroke-width="34" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+  <circle cx="260" cy="256" r="42" fill="url(#pillGrad)" opacity="0.9" />
+  <circle cx="260" cy="256" r="24" fill="#0F172A" />
+  <circle cx="260" cy="256" r="10" fill="#38BDF8" />
+
+  <rect x="190" y="394" width="132" height="28" rx="14" fill="rgba(255,255,255,0.08)" stroke="rgba(56,189,248,0.4)" stroke-width="2" />
+  <text x="256" y="413" fill="#38BDF8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" text-anchor="middle" letter-spacing="3">AI · VIN</text>
+</svg>

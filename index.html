@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Desnak AI - Lojistik Plaka & Şase Kopyalama</title>
+  <meta name="description" content="Lojistikte araç plakalarına göre 17 haneli şase numaralarını (VIN) anında bulup tek dokunuşla kopyalayan akıllı AI destekli mobil asistan.">
+  <meta name="theme-color" content="#F8F9FA" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)">
+
+  <!-- iOS & PWA Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Desnak AI">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+
+  <!-- Stil Dosyası -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <!-- Duvar Kağıdı Katmanı -->
+  <div class="wallpaper-backdrop" aria-hidden="true"></div>
+
+  <!-- Üst Başlık (Sticky iOS Safe Area Header) -->
+  <header class="desnak-header">
+    <div class="header-inner">
+      <div class="brand-wrapper">
+        <img src="icons/header-logo.svg" alt="Desnak AI Logo" class="brand-icon-img" width="32" height="32">
+        <h1 class="brand-title">
+          Desnak <span class="brand-ai-badge">AI</span>
+        </h1>
+      </div>
+
+      <div class="header-actions">
+        <!-- Bulut Senkronizasyon Rozeti -->
+        <div class="sync-badge" title="Firebase Bulut Eşitleme Durumu">
+          <span id="syncStatusDot" class="sync-dot"></span>
+          <span id="syncStatusText" class="sync-text">Bulut</span>
+        </div>
+
+        <!-- Duvar Kağıdı / Açık Tema Geçişi -->
+        <button id="btnThemeToggle" class="header-btn" aria-label="Temayı Değiştir" title="Temayı Değiştir">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+        </button>
+
+        <!-- Ayarlar (API Key & Yedekleme) -->
+        <button id="btnOpenSettings" class="header-btn" aria-label="Ayarlar" title="Ayarlar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Ana İçerik -->
+  <main class="desnak-main">
+    <!-- Hızlı Arama Kutusu -->
+    <div class="search-wrapper">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="searchInput" class="search-input" placeholder="Plaka veya şase no ara..." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+      <button id="clearSearchBtn" class="search-clear-btn" aria-label="Aramayı Temizle">✕</button>
+    </div>
+
+    <!-- Hızlı Eylemler (Ruhsat Tara AI & Manuel Ekle) -->
+    <div class="quick-action-strip">
+      <button id="btnUploadDoc" type="button" class="action-card-btn btn-ai-scan">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="12" y1="18" x2="12" y2="12"></line>
+          <line x1="9" y1="15" x2="15" y2="15"></line>
+        </svg>
+        <span>Ruhsat Tara (AI)</span>
+      </button>
+
+      <button id="btnManualAdd" type="button" class="action-card-btn btn-manual-add">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="16"></line>
+          <line x1="8" y1="12" x2="16" y2="12"></line>
+        </svg>
+        <span>Manuel Ekle</span>
+      </button>
+    </div>
+
+    <!-- Gizli Dosya & Kamera Girişleri -->
+    <input type="file" id="ruhsatFileInput" accept=".pdf,image/*" style="display: none;">
+    <input type="file" id="ruhsatCameraInput" accept="image/*" capture="environment" style="display: none;">
+
+    <!-- Son Kopyalananlar Hızlı Erişim Şeridi -->
+    <section id="recentCopiesTray" class="recent-copies-tray" style="display: none;">
+      <span class="recent-title">Son Kopyalananlar (Hızlı Erişim)</span>
+      <div id="recentCopiesList" class="recent-chips-row"></div>
+    </section>
+
+    <!-- Liste Başlık & Sayaç -->
+    <div class="list-header-row">
+      <span class="list-title">Kayıtlı Araçlar</span>
+      <span id="totalCountBadge" class="count-badge">0</span>
+    </div>
+
+    <!-- Şase & Plaka Kartları Listesi -->
+    <section id="cardsContainer" class="cards-container" aria-live="polite">
+      <!-- Dinamik kartlar buraya çizilir -->
+    </section>
+
+    <!-- Boş Durum Görünümü -->
+    <div id="emptyState" class="empty-state">
+      <div class="empty-icon">🚛</div>
+      <div class="empty-text">Kayıtlı araç bulunamadı</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 280px;">
+        "Ruhsat Tara (AI)" butonuna tıklayarak taranan PDF ruhsatını seçebilir veya manuel ekleyebilirsiniz.
+      </p>
+    </div>
+  </main>
+
+  <!-- Yüzen Sıvı Cam Filtre Barı (iOS 26 Liquid Glass Segmented Dock) -->
+  <nav class="floating-dock-wrapper" aria-label="Araç Filtreleme">
+    <div class="leb-segmented-track">
+      <div id="segSlider" class="seg-slider"></div>
+      <button class="leb-seg-btn active" data-filter="all">Tümü</button>
+      <button class="leb-seg-btn" data-filter="Çekici">Çekici</button>
+      <button class="leb-seg-btn" data-filter="Dorse">Dorse</button>
+      <button class="leb-seg-btn" data-filter="Kamyon">Kamyon</button>
+    </div>
+  </nav>
+
+  <!-- AI Doğrulama & Manuel Ekleme Alt Çarşafı (Verification Modal) -->
+  <div id="verifyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="verifyModalTitle">
+    <div class="modal-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 id="verifyModalTitle" class="sheet-title">Ruhsat Bilgileri</h2>
+        <span id="verifyAiBadge" class="ai-status-badge success">AI Otomatik Okundu</span>
+      </div>
+      <div id="verifyDocBadge" class="doc-name-badge">belge.pdf</div>
+
+      <!-- Plaka -->
+      <div class="form-group">
+        <label class="form-label" for="verifyPlaka">Araç Plakası</label>
+        <input type="text" id="verifyPlaka" class="form-input" placeholder="34 ABC 123" maxlength="15" autocomplete="off" autocapitalize="characters">
+      </div>
+
+      <!-- Şase No (17 Hane Doğrulama) -->
+      <div class="form-group">
+        <label class="form-label" for="verifySaseNo">
+          <span>Şase Numarası (VIN)</span>
+          <span id="saseCharCounter" class="char-badge invalid">0/17</span>
+        </label>
+        <input type="text" id="verifySaseNo" class="form-input font-mono" placeholder="17 Haneli Şase No" maxlength="17" autocomplete="off" autocapitalize="characters">
+      </div>
+
+      <!-- Araç Cinsi Seçici -->
+      <div class="form-group">
+        <label class="form-label">Araç Cinsi</label>
+        <input type="hidden" id="verifyAracCinsi" value="Dorse">
+        <div class="type-selector-row">
+          <button type="button" class="verify-type-btn active" data-type="Dorse">Dorse</button>
+          <button type="button" class="verify-type-btn" data-type="Çekici">Çekici</button>
+          <button type="button" class="verify-type-btn" data-type="Kamyon">Kamyon</button>
+          <button type="button" class="verify-type-btn" data-type="Diğer">Diğer</button>
+        </div>
+      </div>
+
+      <!-- Marka / Model -->
+      <div class="form-group">
+        <label class="form-label">Marka ve Model</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <input type="text" id="verifyMarka" class="form-input" placeholder="Marka (Tırsan, Krone, vs.)" autocapitalize="characters">
+          <input type="text" id="verifyModel" class="form-input" placeholder="Model / Yıl">
+        </div>
+      </div>
+
+      <!-- Ek Notlar -->
+      <div class="form-group">
+        <label class="form-label" for="verifyNotlar">Not (Opsiyonel)</label>
+        <input type="text" id="verifyNotlar" class="form-input" placeholder="Örn: Frigo dorse, Yedek şoför vb.">
+      </div>
+
+      <!-- Aksiyon Butonları -->
+      <div class="modal-actions-row">
+        <button type="button" id="btnCancelVerify" class="btn-secondary">İptal</button>
+        <button type="button" id="btnSaveVerified" class="btn-primary">Kaydet & Eşitle</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Yükleniyor / Tarama Modalı -->
+  <div id="scanLoadingModal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="loading-box">
+      <div class="scanner-spinner"></div>
+      <h3 id="loadingStatusText" style="font-size: 1rem; font-weight: 700;">Ruhsat taranıyor...</h3>
+      <p id="loadingFileName" style="font-size: 0.8rem; color: var(--text-muted); word-break: break-all;"></p>
+    </div>
+  </div>
+
+  <!-- Ayarlar & API Anahtarı Modalı -->
+  <div id="settingsModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <h2 id="settingsModalTitle" class="sheet-title">Uygulama Ayarları</h2>
+        <button type="button" id="btnCloseSettings" class="header-btn" style="font-size: 1.3rem; padding: 4px;">✕</button>
+      </div>
+
+      <!-- Gemini API Anahtarı -->
+      <div class="form-group">
+        <label class="form-label" for="geminiApiKeyInput">Google Gemini API Anahtarı</label>
+        <input type="password" id="geminiApiKeyInput" class="form-input" placeholder="AIzaSy..." autocomplete="off">
+        <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 5px; line-height: 1.4;">
+          Ruhsat PDF ve fotoğraflarından şase numarasını otomatik okumak için Google AI Studio'dan aldığınız API anahtarınızı girebilirsiniz. Vercel ortamında `GEMINI_API_KEY` eklediyseniz boş bırakabilirsiniz.
+        </p>
+        <button type="button" id="btnSaveApiKey" class="btn-primary" style="margin-top: 8px; height: 42px;">Anahtarı Kaydet</button>
+      </div>
+
+      <!-- Veri Yedekleme -->
+      <div class="form-group" style="margin-top: 8px;">
+        <label class="form-label">Veri Yedekleme & Dışa Aktarma</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+          <button type="button" id="btnExportCsv" class="btn-secondary">CSV İndir (Excel)</button>
+          <button type="button" id="btnExportJson" class="btn-secondary">JSON Yedek</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dynamic Island / Floating Toast -->
+  <div id="lebToast" class="leb-toast" role="alert" aria-live="polite">
+    <span id="toastText">Kopyalandı</span>
+  </div>
+
+  <!-- JS Modülleri (Sıralama: Sync -> AI Parser -> App UI) -->
+  <script src="js/sync.js"></script>
+  <script src="js/ai-parser.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

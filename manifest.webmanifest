@@ -1,0 +1,18 @@
+{
+  "name": "Desnak AI - Şase & Plaka Asistanı",
+  "short_name": "Desnak AI",
+  "description": "Lojistik operasyonları için tek dokunuşla araç plakası ve şase (VIN) numarası kopyalama asistanı.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F8F9FA",
+  "theme_color": "#F8F9FA",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "desnak-ai",
+  "version": "1.0.0",
+  "description": "Desnak AI - Mobil Lojistik Şase & Plaka Hızlı Kopyalama Asistanı",
+  "private": true,
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {}
+}
