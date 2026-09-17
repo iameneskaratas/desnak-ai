@@ -67,54 +67,108 @@ Yalnızca aşağıdaki JSON şemasına uygun saf JSON çıktısı ver, markdown 
 
     // Gemini 2.0 Flash ve Fallback 1.5 Flash
     const models = ['gemini-2.0-flash', 'gemini-1.5-flash'];
-    let lastError = null;
+    let errors = [];
     let geminiResponse = null;
 
-    for (const modelName of models) {
-      try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    inline_data: {
-                      mime_type: cleanMime,
-                      data: cleanBase64
-                    }
-                  },
-                  {
-                    text: promptText
-                  }
-                ]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.1,
-              response_mime_type: 'application/json'
-            }
-          })
-        });
+    // Eğer debug amaçlı model listeleme istenirse
+    if (body && body.action === 'list-models') {
+      const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
+      const listRes = await fetch(listUrl);
+      const listData = await listRes.json();
+      return res.status(200).json({ success: true, models: listData });
+    }
 
-        if (response.ok) {
-          geminiResponse = await response.json();
-          break;
-        } else {
-          const errData = await response.text();
-          lastError = `Model ${modelName} hatası (${response.status}): ${errData}`;
+    // Öncelikli modeller
+    const candidateModels = [
+      'gemini-2.0-flash',
+      'gemini-2.0-flash-001',
+      'gemini-1.5-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-1.5-pro',
+      'gemini-pro'
+    ];
+
+    // Önce bilinen modelleri dene
+    for (const modelName of candidateModels) {
+      for (const apiVersion of ['v1beta', 'v1']) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${modelName}:generateContent?key=${apiKey}`;
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      inline_data: {
+                        mime_type: cleanMime,
+                        data: cleanBase64
+                      }
+                    },
+                    {
+                      text: promptText
+                    }
+                  ]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.1
+              }
+            })
+          });
+
+          if (response.ok) {
+            geminiResponse = await response.json();
+            break;
+          } else {
+            const errData = await response.text();
+            errors.push(`${apiVersion}/${modelName} (${response.status}): ${errData.slice(0, 150)}`);
+          }
+        } catch (err) {
+          errors.push(`${apiVersion}/${modelName}: ${err.message}`);
         }
-      } catch (err) {
-        lastError = err.message;
+      }
+      if (geminiResponse) break;
+    }
+
+    // Eğer hala bulunamadıysa hesaba ait modelleri otomatik listele ve çalışan birini seç
+    if (!geminiResponse) {
+      try {
+        const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        if (listRes.ok) {
+          const listJson = await listRes.json();
+          const available = (listJson.models || [])
+            .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''));
+          
+          for (const autoModel of available) {
+            try {
+              const url = `https://generativelanguage.googleapis.com/v1beta/models/${autoModel}:generateContent?key=${apiKey}`;
+              const resp = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ inline_data: { mime_type: cleanMime, data: cleanBase64 } }, { text: promptText }] }],
+                  generationConfig: { temperature: 0.1 }
+                })
+              });
+              if (resp.ok) {
+                geminiResponse = await resp.json();
+                break;
+              }
+            } catch(e) {}
+          }
+        }
+      } catch (listErr) {
+        errors.push(`Model listeleme hatası: ${listErr.message}`);
       }
     }
 
     if (!geminiResponse) {
       return res.status(500).json({
         success: false,
-        error: `AI analizi tamamlanamadı: ${lastError || 'Bilinmeyen hata'}`
+        error: `AI analizi tamamlanamadı. Hatalar: ${errors.join(' | ')}`
       });
     }
 
