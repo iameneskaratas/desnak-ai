@@ -3,7 +3,7 @@
  * Minimalist iOS Liquid Glass Kartları, Anlık Kopyalama, Haptic Titreşim & Canlı Arama
  */
 
-let currentFilter = 'all'; // 'all' | 'Çekici' | 'Dorse' | 'Kamyon'
+let currentFilter = 'Çekici'; // 'Çekici' | 'Dorse'
 let searchQuery = '';
 let recentCopies = [];
 
@@ -52,14 +52,16 @@ async function initApp() {
 function initTheme() {
   const saved = localStorage.getItem('desnak_theme_mode');
   if (saved === 'wallpaper') {
+    document.documentElement.classList.add('theme-wallpaper');
     document.body.classList.add('theme-wallpaper');
   }
 
   const btnToggle = document.getElementById('btnThemeToggle');
   if (btnToggle) {
     btnToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('theme-wallpaper');
       document.body.classList.toggle('theme-wallpaper');
-      const isWall = document.body.classList.contains('theme-wallpaper');
+      const isWall = document.documentElement.classList.contains('theme-wallpaper');
       localStorage.setItem('desnak_theme_mode', isWall ? 'wallpaper' : 'light');
       hapticTap(10);
       showToast(isWall ? 'Duvar Kağıdı Teması Aktif' : 'Aydınlık Tema Aktif', 'info');
@@ -110,35 +112,132 @@ function setupSearch() {
 }
 
 /**
- * iOS Liquid Glass Segmented Control (Tümü / Çekici / Dorse)
+ * iOS Liquid Glass Slider Dock — Sadece Çekici & Dorse
+ * Parmağınızla tutarak gerçek zamanlı kaydırma & Spring Snap
  */
 function setupSegmentedTabs() {
-  const track = document.querySelector('.leb-segmented-track');
+  const track = document.getElementById('dockTrack') || document.querySelector('.leb-segmented-track');
   const slider = document.getElementById('segSlider');
-  const buttons = document.querySelectorAll('.leb-seg-btn');
-  if (!track || !slider || buttons.length === 0) return;
+  const btnCekici = document.getElementById('tabCekici');
+  const btnDorse = document.getElementById('tabDorse');
 
-  function updateSliderPosition(activeBtn) {
-    const idx = parseInt(activeBtn.dataset.index, 10) || 0;
-    const count = buttons.length;
-    slider.style.width = `calc(${100 / count}% - 6px)`;
-    slider.style.transform = `translateX(${idx * 100}%)`;
+  if (!track || !slider || !btnCekici || !btnDorse) return;
+
+  function updateSliderPos(filterName, animate = true) {
+    slider.style.transition = animate
+      ? 'transform 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+      : 'none';
+    const isDorse = (filterName || '').toLowerCase() === 'dorse';
+    slider.style.transform = isDorse ? 'translateX(100%) scale(1)' : 'translateX(0%) scale(1)';
+    
+    btnCekici.classList.toggle('active', !isDorse);
+    btnDorse.classList.toggle('active', isDorse);
   }
 
-  buttons.forEach((btn, index) => {
-    btn.dataset.index = index;
-    btn.addEventListener('click', () => {
-      buttons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentFilter = btn.dataset.filter || 'all';
-      updateSliderPosition(btn);
-      hapticTap(12);
-      renderCurrentView();
-    });
-  });
+  function setFilter(newFilter, animate = true) {
+    if (currentFilter === newFilter) return;
+    currentFilter = newFilter;
+    updateSliderPos(currentFilter, animate);
+    hapticTap(15);
+    renderCurrentView();
+  }
 
-  const initialActive = document.querySelector('.leb-seg-btn.active') || buttons[0];
-  updateSliderPosition(initialActive);
+  // Tıklama Olayları
+  btnCekici.addEventListener('click', () => setFilter('Çekici', true));
+  btnDorse.addEventListener('click', () => setFilter('Dorse', true));
+
+  // ── Parmakla Tutarak Kaydırma (Touch Gesture Drag) ──
+  let dragStartX = null;
+  let dragStartY = null;
+  let dragBase = null;
+  let isDragging = false;
+  let isScrolling = false;
+  let dirLocked = false;
+
+  track.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    dragStartX = t.clientX;
+    dragStartY = t.clientY;
+    dragBase = currentFilter;
+    isDragging = true;
+    isScrolling = false;
+    dirLocked = false;
+    slider.style.transition = 'none';
+  }, { passive: true });
+
+  track.addEventListener('touchmove', (e) => {
+    if (!isDragging || dragStartX === null) return;
+    const t = e.touches[0];
+    const dx = t.clientX - dragStartX;
+    const dy = t.clientY - dragStartY;
+
+    if (!dirLocked && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+      dirLocked = true;
+      isScrolling = Math.abs(dy) > Math.abs(dx);
+    }
+
+    if (isScrolling) {
+      isDragging = false;
+      updateSliderPos(dragBase, true);
+      return;
+    }
+
+    const isBaseDorse = (dragBase || '').toLowerCase() === 'dorse';
+    const baseVal = isBaseDorse ? 1 : 0;
+    const halfWidth = track.getBoundingClientRect().width / 2;
+    const rawProgress = baseVal + (dx / halfWidth);
+
+    // Elastik sınır direnci
+    let clamped;
+    if (rawProgress < 0) {
+      clamped = rawProgress * 0.25;
+    } else if (rawProgress > 1) {
+      clamped = 1 + (rawProgress - 1) * 0.25;
+    } else {
+      clamped = rawProgress;
+    }
+
+    // Organik sıvı cam esnemesi (stretch)
+    const stretch = 1 + Math.min(0.06, Math.abs(dx) / (halfWidth * 4));
+    slider.style.transform = `translateX(${clamped * 100}%) scaleX(${stretch})`;
+  }, { passive: true });
+
+  function onEnd(e) {
+    if (!isDragging || dragStartX === null) {
+      isDragging = false;
+      return;
+    }
+    isDragging = false;
+
+    const t = e.changedTouches ? e.changedTouches[0] : null;
+    slider.style.transition = 'transform 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+    if (t && !isScrolling) {
+      const dx = t.clientX - dragStartX;
+      const halfWidth = track.getBoundingClientRect().width / 2;
+      const isBaseDorse = (dragBase || '').toLowerCase() === 'dorse';
+      const baseVal = isBaseDorse ? 1 : 0;
+      const progress = baseVal + (dx / halfWidth);
+
+      if ((progress > 0.35 || dx > 25) && !isBaseDorse) {
+        setFilter('Dorse', true);
+      } else if ((progress < 0.65 || dx < -25) && isBaseDorse) {
+        setFilter('Çekici', true);
+      } else {
+        updateSliderPos(dragBase, true);
+      }
+    } else {
+      updateSliderPos(currentFilter, true);
+    }
+    dragStartX = dragStartY = null;
+  }
+
+  track.addEventListener('touchend', onEnd, { passive: true });
+  track.addEventListener('touchcancel', onEnd, { passive: true });
+
+  // İlk pozisyon
+  updateSliderPos(currentFilter, false);
 }
 
 /**
@@ -148,12 +247,22 @@ function renderCurrentView() {
   const container = document.getElementById('cardsContainer');
   const emptyState = document.getElementById('emptyState');
   const countBadge = document.getElementById('totalCountBadge');
+  const countCekici = document.getElementById('countCekici');
+  const countDorse = document.getElementById('countDorse');
   if (!container) return;
 
-  let records = getStoredRecords();
+  const allRecords = getStoredRecords();
 
-  // Kategori Filtresi
-  if (currentFilter !== 'all') {
+  // Tab sayaçlarını hesapla
+  const cekiciCount = allRecords.filter(r => (r.aracCinsi || '').toLowerCase() === 'çekici').length;
+  const dorseCount = allRecords.filter(r => (r.aracCinsi || '').toLowerCase() === 'dorse').length;
+  if (countCekici) countCekici.textContent = cekiciCount;
+  if (countDorse) countDorse.textContent = dorseCount;
+
+  let records = allRecords;
+
+  // Sadece Çekici ve Dorse Filtresi
+  if (currentFilter) {
     records = records.filter(r => (r.aracCinsi || '').toLowerCase() === currentFilter.toLowerCase());
   }
 
@@ -188,7 +297,6 @@ function renderCurrentView() {
   attachCardEvents(container);
   
   // Son kopyalananlar şeridini güncelle
-  renderRecentCopiesTray();
 }
 
 /**

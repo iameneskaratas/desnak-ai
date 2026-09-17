@@ -78,14 +78,14 @@ Yalnızca aşağıdaki JSON şemasına uygun saf JSON çıktısı ver, markdown 
       return res.status(200).json({ success: true, models: listData });
     }
 
-    // Öncelikli modeller
+    // 2026 Güncel Gemini Modelleri
     const candidateModels = [
-      'gemini-2.0-flash',
-      'gemini-2.0-flash-001',
-      'gemini-1.5-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-1.5-pro',
-      'gemini-pro'
+      'gemini-2.5-flash',
+      'gemini-flash-latest',
+      'gemini-2.5-flash-lite',
+      'gemini-3.5-flash',
+      'gemini-2.5-pro',
+      'gemini-pro-latest'
     ];
 
     // Önce bilinen modelleri dene
@@ -113,7 +113,8 @@ Yalnızca aşağıdaki JSON şemasına uygun saf JSON çıktısı ver, markdown 
                 }
               ],
               generationConfig: {
-                temperature: 0.1
+                temperature: 0.1,
+                response_mime_type: 'application/json'
               }
             })
           });
@@ -181,9 +182,9 @@ Yalnızca aşağıdaki JSON şemasına uygun saf JSON çıktısı ver, markdown 
     const rawText = candidates[0].content.parts[0].text.trim();
     let parsedData = {};
     try {
-      // JSON temizleme (olası markdown backtick temizliği)
-      const cleanJson = rawText.replace(/^```json\s*/i, '').replace(/^```\s*/, '').replace(/```$/s, '').trim();
-      parsedData = JSON.parse(cleanJson);
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Cevapta JSON verisi bulunamadı');
+      parsedData = JSON.parse(jsonMatch[0]);
     } catch (e) {
       return res.status(500).json({ success: false, error: 'AI çıktısı JSON olarak okunamadı: ' + rawText });
     }

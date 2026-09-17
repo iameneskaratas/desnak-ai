@@ -15,6 +15,15 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
   <link rel="apple-touch-icon" href="icons/icon.svg">
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('desnak_theme_mode') === 'wallpaper') {
+          document.documentElement.classList.add('theme-wallpaper');
+        }
+      } catch(e) {}
+    })();
+  </script>
 
   <!-- Stil Dosyası -->
   <link rel="stylesheet" href="css/app.css">
@@ -123,14 +132,18 @@
     </div>
   </main>
 
-  <!-- Yüzen Sıvı Cam Filtre Barı (iOS 26 Liquid Glass Segmented Dock) -->
+  <!-- Yüzen Sıvı Cam Filtre Barı (iOS 26 Liquid Glass - Sadece Çekici & Dorse) -->
   <nav class="floating-dock-wrapper" aria-label="Araç Filtreleme">
-    <div class="leb-segmented-track">
-      <div id="segSlider" class="seg-slider"></div>
-      <button class="leb-seg-btn active" data-filter="all">Tümü</button>
-      <button class="leb-seg-btn" data-filter="Çekici">Çekici</button>
-      <button class="leb-seg-btn" data-filter="Dorse">Dorse</button>
-      <button class="leb-seg-btn" data-filter="Kamyon">Kamyon</button>
+    <div class="leb-segmented-track" id="dockTrack">
+      <div id="segSlider" class="seg-slider" aria-hidden="true"></div>
+      <button type="button" id="tabCekici" class="leb-seg-btn active" data-filter="Çekici">
+        <span class="seg-text">Çekici</span>
+        <span id="countCekici" class="seg-count">0</span>
+      </button>
+      <button type="button" id="tabDorse" class="leb-seg-btn" data-filter="Dorse">
+        <span class="seg-text">Dorse</span>
+        <span id="countDorse" class="seg-count">0</span>
+      </button>
     </div>
   </nav>
 

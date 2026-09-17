@@ -85,12 +85,15 @@ async function processRuhsatFile(file) {
   const loadingFileName = document.getElementById('loadingFileName');
 
   if (loadingFileName) loadingFileName.textContent = file.name;
-  if (loadingStatusText) loadingStatusText.textContent = 'Belge taranıyor ve AI inceliyor...';
+  if (loadingStatusText) loadingStatusText.textContent = 'Belge optimize ediliyor...';
   if (scanLoadingModal) scanLoadingModal.classList.add('active');
 
   try {
-    const base64Data = await fileToBase64(file);
-    const mimeType = file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg');
+    const isImage = file.type && file.type.startsWith('image/');
+    const base64Data = isImage ? await compressAndEncodeImage(file) : await fileToBase64(file);
+    const mimeType = isImage ? 'image/jpeg' : (file.type || (file.name.endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'));
+
+    if (loadingStatusText) loadingStatusText.textContent = 'Gemini AI ruhsatı inceliyor...';
 
     // Dosya önizlemesi
     if (currentPreviewUrl) URL.revokeObjectURL(currentPreviewUrl);
@@ -116,13 +119,13 @@ async function processRuhsatFile(file) {
     if (scanLoadingModal) scanLoadingModal.classList.remove('active');
 
     if (result.success && result.data) {
+      showToast('AI ruhsatı başarıyla okudu!', 'success');
       openVerifyModal(result.data, file.name, false);
     } else if (result.needApiKey) {
-      // API Key eksik ise kullanıcıyı uyar ve manuel doldurmaya yönlendir
       openApiKeyModal(result.error);
     } else {
-      // AI okuyamadıysa boş taslakla aç
-      showToast('AI tam okuyamadı, lütfen bilgileri kontrol edin', 'warning');
+      const errorMsg = result.error || 'AI bilgileri okuyamadı';
+      showToast(errorMsg, 'warning');
       openVerifyModal({
         plaka: extractPlateFromFileName(file.name),
         saseNo: '',
@@ -135,7 +138,7 @@ async function processRuhsatFile(file) {
   } catch (err) {
     console.error('Ruhsat tarama hatası:', err);
     if (scanLoadingModal) scanLoadingModal.classList.remove('active');
-    showToast('Sunucu bağlantı hatası, manuel form açılıyor', 'warning');
+    showToast('Bağlantı hatası, kontrol formu açılıyor', 'warning');
     openVerifyModal({
       plaka: extractPlateFromFileName(file.name),
       saseNo: '',
@@ -275,6 +278,42 @@ function fileToBase64(file) {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);
     reader.onerror = error => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * iPhone kamera ve yüksek çözünürlüklü fotoğrafları max 1600px ve JPEG 0.8 kalitesine sıkıştırır
+ */
+function compressAndEncodeImage(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1600;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) {
+            h = Math.round((h * maxDim) / w);
+            w = maxDim;
+          } else {
+            w = Math.round((w * maxDim) / h);
+            h = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.onerror = () => resolve(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve('');
     reader.readAsDataURL(file);
   });
 }
