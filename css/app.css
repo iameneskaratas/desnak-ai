@@ -90,27 +90,27 @@ body.theme-wallpaper .wallpaper-backdrop {
 }
 
 /* ════════════════════════════════════════════════════════
-   TOP HEADER (iOS Safe Area & Crisp Clean Header)
+   TOP HEADER (iOS Native - Crystal Clear, Zero Blur)
    ════════════════════════════════════════════════════════ */
 .desnak-header {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: #FFFFFF;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-top: max(12px, env(safe-area-inset-top, 12px));
-  padding-bottom: 10px;
+  position: relative;
+  z-index: 50;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding-top: calc(env(safe-area-inset-top, 20px) + 10px);
+  padding-bottom: 6px;
   padding-left: max(16px, env(safe-area-inset-left));
   padding-right: max(16px, env(safe-area-inset-right));
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-  transition: background 0.25s ease, border-color 0.25s ease;
 }
 
 html.theme-wallpaper .desnak-header,
 body.theme-wallpaper .desnak-header {
-  background: #0F172A;
-  border-bottom-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .header-inner {
@@ -861,17 +861,21 @@ html.theme-wallpaper .leb-seg-btn.active .seg-count {
 .modal-sheet {
   background: var(--bg-surface);
   width: 100%;
-  max-width: 540px;
+  max-width: 520px;
+  max-height: 86dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   border-radius: 24px 24px 0 0;
-  padding: 20px 20px max(24px, env(safe-area-inset-bottom, 24px)) 20px;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
+  padding: 16px 20px calc(env(safe-area-inset-bottom, 20px) + 16px) 20px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-body.theme-wallpaper .modal-sheet {
+body.theme-wallpaper .modal-sheet,
+html.theme-wallpaper .modal-sheet {
   background: #0F172A;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
   color: #FFFFFF;
@@ -967,15 +971,16 @@ body.theme-wallpaper .form-label {
 
 .form-input {
   width: 100%;
-  height: 44px;
-  padding: 0 12px;
-  font-size: 0.95rem;
+  height: 48px;
+  padding: 0 14px;
+  font-size: 16px !important; /* iPhone auto-zoom engelleme */
   font-weight: 600;
   border-radius: var(--radius-md);
   border: 1.5px solid var(--border-strong);
   background: var(--bg-subtle);
   color: var(--text-primary);
   outline: none;
+  -webkit-appearance: none;
 }
 
 .form-input:focus {
@@ -983,37 +988,49 @@ body.theme-wallpaper .form-label {
   background: #FFFFFF;
 }
 
-body.theme-wallpaper .form-input {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.25);
+body.theme-wallpaper .form-input,
+html.theme-wallpaper .form-input {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
   color: #FFFFFF;
+}
+
+body.theme-wallpaper .form-input:focus,
+html.theme-wallpaper .form-input:focus {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: var(--accent-blue);
 }
 
 .form-input.font-mono {
   font-family: var(--font-mono);
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
 }
 
-/* Cins Seçim Butonları */
+/* Cins Seçim Butonları (Sadece Çekici & Dorse) */
 .type-selector-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .verify-type-btn {
-  padding: 8px 4px;
-  font-size: 0.8rem;
+  height: 44px;
+  padding: 0 8px;
+  font-size: 0.92rem;
   font-weight: 700;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--bg-subtle);
   border: 1.5px solid var(--border-subtle);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-body.theme-wallpaper .verify-type-btn {
+body.theme-wallpaper .verify-type-btn,
+html.theme-wallpaper .verify-type-btn {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
   color: #FFFFFF;
@@ -1025,16 +1042,23 @@ body.theme-wallpaper .verify-type-btn {
   border-color: #0F172A;
 }
 
-body.theme-wallpaper .verify-type-btn.active {
+body.theme-wallpaper .verify-type-btn.active,
+html.theme-wallpaper .verify-type-btn.active {
   background: #0284C7;
   border-color: #38BDF8;
 }
 
 .modal-actions-row {
+  position: sticky;
+  bottom: 0;
+  background: inherit;
+  padding-top: 10px;
+  padding-bottom: 2px;
   display: grid;
   grid-template-columns: 1fr 2fr;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 6px;
+  z-index: 10;
 }
 
 .btn-secondary {

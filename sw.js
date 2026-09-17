@@ -1,5 +1,5 @@
-// Desnak AI - Service Worker v1.0.0
-const CACHE_VERSION = 'v1.0.0';
+// Desnak AI - Service Worker v2.2.0
+const CACHE_VERSION = 'v2.2.0';
 const CACHE_NAME = `desnak-ai-${CACHE_VERSION}`;
 
 const PRECACHE_ASSETS = [

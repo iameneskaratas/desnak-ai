@@ -25,8 +25,8 @@
     })();
   </script>
 
-  <!-- Stil Dosyası -->
-  <link rel="stylesheet" href="css/app.css">
+  <!-- Stil Dosyası (v2.2.0 - iPhone Optimized) -->
+  <link rel="stylesheet" href="css/app.css?v=2.2.0">
 </head>
 <body>
   <!-- Duvar Kağıdı Katmanı -->
@@ -152,8 +152,11 @@
     <div class="modal-sheet">
       <div class="sheet-handle"></div>
       <div class="sheet-header">
-        <h2 id="verifyModalTitle" class="sheet-title">Ruhsat Bilgileri</h2>
-        <span id="verifyAiBadge" class="ai-status-badge success">AI Otomatik Okundu</span>
+        <div>
+          <h2 id="verifyModalTitle" class="sheet-title">Ruhsat Bilgileri</h2>
+          <span id="verifyAiBadge" class="ai-status-badge success">AI Otomatik Okundu</span>
+        </div>
+        <button type="button" id="btnCloseVerifyX" class="header-btn" style="font-size: 1.3rem; padding: 4px;" aria-label="Kapat">✕</button>
       </div>
       <div id="verifyDocBadge" class="doc-name-badge">belge.pdf</div>
 
@@ -172,15 +175,13 @@
         <input type="text" id="verifySaseNo" class="form-input font-mono" placeholder="17 Haneli Şase No" maxlength="17" autocomplete="off" autocapitalize="characters">
       </div>
 
-      <!-- Araç Cinsi Seçici -->
+      <!-- Araç Cinsi Seçici (Sadece Çekici & Dorse) -->
       <div class="form-group">
         <label class="form-label">Araç Cinsi</label>
-        <input type="hidden" id="verifyAracCinsi" value="Dorse">
+        <input type="hidden" id="verifyAracCinsi" value="Çekici">
         <div class="type-selector-row">
-          <button type="button" class="verify-type-btn active" data-type="Dorse">Dorse</button>
-          <button type="button" class="verify-type-btn" data-type="Çekici">Çekici</button>
-          <button type="button" class="verify-type-btn" data-type="Kamyon">Kamyon</button>
-          <button type="button" class="verify-type-btn" data-type="Diğer">Diğer</button>
+          <button type="button" class="verify-type-btn active" data-type="Çekici">Çekici</button>
+          <button type="button" class="verify-type-btn" data-type="Dorse">Dorse</button>
         </div>
       </div>
 
@@ -251,9 +252,9 @@
     <span id="toastText">Kopyalandı</span>
   </div>
 
-  <!-- JS Modülleri (Sıralama: Sync -> AI Parser -> App UI) -->
-  <script src="js/sync.js"></script>
-  <script src="js/ai-parser.js"></script>
-  <script src="js/app.js"></script>
+  <!-- JS Modülleri (v2.2.0) -->
+  <script src="js/sync.js?v=2.2.0"></script>
+  <script src="js/ai-parser.js?v=2.2.0"></script>
+  <script src="js/app.js?v=2.2.0"></script>
 </body>
 </html>

@@ -160,28 +160,32 @@ function setupSegmentedTabs() {
     dragStartX = t.clientX;
     dragStartY = t.clientY;
     dragBase = currentFilter;
-    isDragging = true;
+    isDragging = false;
     isScrolling = false;
     dirLocked = false;
-    slider.style.transition = 'none';
   }, { passive: true });
 
   track.addEventListener('touchmove', (e) => {
-    if (!isDragging || dragStartX === null) return;
+    if (dragStartX === null || isScrolling) return;
     const t = e.touches[0];
     const dx = t.clientX - dragStartX;
     const dy = t.clientY - dragStartY;
 
-    if (!dirLocked && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
-      dirLocked = true;
-      isScrolling = Math.abs(dy) > Math.abs(dx);
+    if (!dirLocked) {
+      if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 4) {
+        dirLocked = true;
+        isScrolling = true;
+        isDragging = false;
+        return;
+      }
+      if (Math.abs(dx) > 6) {
+        dirLocked = true;
+        isDragging = true;
+        slider.style.transition = 'none';
+      }
     }
 
-    if (isScrolling) {
-      isDragging = false;
-      updateSliderPos(dragBase, true);
-      return;
-    }
+    if (!isDragging) return;
 
     const isBaseDorse = (dragBase || '').toLowerCase() === 'dorse';
     const baseVal = isBaseDorse ? 1 : 0;
@@ -204,16 +208,14 @@ function setupSegmentedTabs() {
   }, { passive: true });
 
   function onEnd(e) {
-    if (!isDragging || dragStartX === null) {
-      isDragging = false;
-      return;
-    }
+    if (dragStartX === null) return;
+    const wasDragging = isDragging;
     isDragging = false;
 
     const t = e.changedTouches ? e.changedTouches[0] : null;
     slider.style.transition = 'transform 0.38s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
 
-    if (t && !isScrolling) {
+    if (wasDragging && t && !isScrolling) {
       const dx = t.clientX - dragStartX;
       const halfWidth = track.getBoundingClientRect().width / 2;
       const isBaseDorse = (dragBase || '').toLowerCase() === 'dorse';

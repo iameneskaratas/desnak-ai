@@ -72,6 +72,11 @@ function setupAiScanner() {
   if (btnCancelVerify) {
     btnCancelVerify.addEventListener('click', closeVerifyModal);
   }
+
+  const btnCloseVerifyX = document.getElementById('btnCloseVerifyX');
+  if (btnCloseVerifyX) {
+    btnCloseVerifyX.addEventListener('click', closeVerifyModal);
+  }
 }
 
 /**
